@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GameState, Orb, Spell } from '../types/game';
 import { getRandomSpell } from '../data/spells';
 import OrbButton from './OrbButton';
-import SpellDisplay from './SpellDisplay';
+import DualSpellDisplay from './DualSpellDisplay';
 import InvokeButton from './InvokeButton';
 import GameStats from './GameStats';
 import SpellsList from './SpellsList';
@@ -35,6 +35,7 @@ const InvokerGame: React.FC = () => {
       score: 0,
       timeElapsed: 0,
    });
+   const [nextSpell, setNextSpell] = useState<Spell | null>(null);
    const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
    const [pressedOrb, setPressedOrb] = useState<Orb | null>(null);
    const [pressedInvoke, setPressedInvoke] = useState(false);
@@ -97,13 +98,16 @@ const InvokerGame: React.FC = () => {
 
    const startGame = () => {
       setTimedResult(null);
+      const firstSpell = getRandomSpell();
+      const secondSpell = getRandomSpell(firstSpell);
       setGameState({
          isPlaying: true,
-         currentSpell: getRandomSpell(),
+         currentSpell: firstSpell,
          userCombination: [],
          score: 0,
          timeElapsed: 0,
       });
+      setNextSpell(secondSpell);
    };
 
    const stopGame = () => {
@@ -113,6 +117,7 @@ const InvokerGame: React.FC = () => {
          currentSpell: null,
          userCombination: [],
       }));
+      setNextSpell(null);
    };
 
    const handleOrbPress = (orb: Orb) => {
@@ -157,9 +162,12 @@ const InvokerGame: React.FC = () => {
          setGameState(prev => ({
             ...prev,
             score: prev.score + 1,
-            currentSpell: getRandomSpell(prev.currentSpell || undefined),
+            currentSpell: nextSpell,
             userCombination: [],
          }));
+         // Генерируем новое следующее заклинание
+         const newNextSpell = getRandomSpell(nextSpell || undefined);
+         setNextSpell(newNextSpell);
       }
    };
 
@@ -213,8 +221,9 @@ const InvokerGame: React.FC = () => {
                      </div>
                   )}
                   <div className="mb-8 w-full">
-                     <SpellDisplay
-                        spell={gameState.currentSpell}
+                     <DualSpellDisplay
+                        currentSpell={gameState.currentSpell}
+                        nextSpell={nextSpell}
                         userCombination={gameState.userCombination}
                      />
                   </div>
