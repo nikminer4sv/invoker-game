@@ -138,10 +138,21 @@ const InvokerGame: React.FC = () => {
       });
    };
 
+   // Функция для сравнения комбинаций сфер независимо от порядка
+   const compareCombinations = (combination1: Orb[], combination2: Orb[]): boolean => {
+      if (combination1.length !== combination2.length) return false;
+
+      // Создаем копии массивов и сортируем их для сравнения
+      const sorted1 = [...combination1].sort();
+      const sorted2 = [...combination2].sort();
+
+      return JSON.stringify(sorted1) === JSON.stringify(sorted2);
+   };
+
    const handleInvoke = () => {
       if (!gameState.isPlaying || gameState.userCombination.length !== 3 || !gameState.currentSpell) return;
       if (gameMode === GAME_MODES.TIMED && gameState.timeElapsed >= 60) return;
-      const isCorrect = JSON.stringify(gameState.userCombination) === JSON.stringify(gameState.currentSpell.combination);
+      const isCorrect = compareCombinations(gameState.userCombination, gameState.currentSpell.combination);
       if (isCorrect) {
          setGameState(prev => ({
             ...prev,
